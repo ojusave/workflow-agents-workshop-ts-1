@@ -83,16 +83,17 @@ async function runCodeReview(prUrl: string, labels: string[] = []): Promise<stri
 
 const app = new Hono();
 
-// API-key auth for workflow + webhook POSTs. Open when WORKFLOW_API_KEY is unset.
+// API-key auth for the review + webhook write paths. Open when WORKFLOW_API_KEY
+// is unset. (Reads — the viewer and its APIs — are always open.)
 const apiKey = process.env.WORKFLOW_API_KEY;
 if (apiKey) {
   const expected = `Bearer ${apiKey}`;
-  app.use("/workflows/*", async (c, next) => {
-    if (c.req.method !== "POST") return next();
+  app.use("/webhooks/*", async (c, next) => {
     if (c.req.header("authorization") === expected) return next();
     return c.json({ error: "unauthorized" }, 401);
   });
-  app.use("/webhooks/*", async (c, next) => {
+  app.use("/api/reviews", async (c, next) => {
+    if (c.req.method !== "POST") return next();
     if (c.req.header("authorization") === expected) return next();
     return c.json({ error: "unauthorized" }, 401);
   });
@@ -100,22 +101,8 @@ if (apiKey) {
 
 app.get("/healthz", (c) => c.json({ ok: true }));
 
-app.get("/workflows", (c) => c.json({ workflows: Object.keys(mapping) }));
-
-// Generic workflow trigger (used for quick-review and the authoring finale).
-app.post("/workflows/:name", async (c) => {
-  const name = c.req.param("name");
-  if (!mapping[name]) return c.json({ error: `unknown workflow "${name}"` }, 404);
-  const input = await c.req.json().catch(() => ({}));
-  try {
-    const result = await runWorkflow(name, input);
-    return c.json({ result }, 200);
-  } catch (err) {
-    return c.json({ error: err instanceof Error ? err.message : String(err) }, 500);
-  }
-});
-
-// The shared viewer's submit path: enqueue a code review by PR URL.
+// The single trigger for a code review (same shape as Patterns 1 & 2). Authored
+// workflows like quick-review are run via the Render CLI (`render workflows dev`).
 app.post("/api/reviews", async (c) => {
   if (!mapping["code-review"]) return c.json({ error: "code-review not available" }, 503);
   const body = (await c.req.json().catch(() => ({}))) as { prUrl?: string };

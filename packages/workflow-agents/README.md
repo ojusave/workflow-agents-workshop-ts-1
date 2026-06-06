@@ -55,19 +55,14 @@ npm run dev:workflows --workspace @workshop/workflow-agents
 
 No API key required — agents fall back to a mock model. Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` for real reviews.
 
-Trigger a code review (any of these):
+Trigger a code review:
 
 ```sh
-# Via the shared viewer's submit path
 curl -s -X POST http://localhost:3000/api/reviews \
   -H 'content-type: application/json' -d '{"prUrl":"https://github.com/<owner>/<repo>/pull/<n>"}'
-
-# Via the raw workflow route
-curl -s -X POST http://localhost:3000/workflows/code-review \
-  -H 'content-type: application/json' -d '{"url":"https://github.com/<owner>/<repo>/pull/<n>","labels":[]}'
 ```
 
-Then open `http://localhost:3000/` for the reviews table. GitHub webhook setup is in [`docs/code-review-setup.md`](docs/code-review-setup.md).
+Then open `http://localhost:3000/` for the reviews table. GitHub webhook setup is in [`docs/code-review-setup.md`](docs/code-review-setup.md). Authored workflows like `quick-review` are run via the Render CLI — see [`docs/04-author-a-task.md`](../../docs/04-author-a-task.md).
 
 ## Deploying to Render
 
@@ -93,8 +88,6 @@ src/
 |-------|-------------|
 | `POST /api/reviews` | Submit a code review by `{ prUrl }` (used by the viewer) |
 | `GET /` · `GET /api/reviews` · `GET /api/reviews/:id` | Telemetry viewer + its read APIs |
-| `POST /workflows/:name` | Run a workflow by name (in-process locally, dispatched in prod) |
-| `GET /workflows` | List registered workflow names |
 | `POST /webhooks/github` | GitHub PR webhook → code review |
 | `GET /healthz` | Liveness check |
 
@@ -105,7 +98,7 @@ src/
 | `RENDER_USE_LOCAL_DEV` | `true` runs tasks in-process (local dev) |
 | `DATABASE_URL` | Postgres for durable runs/reviews; falls back to in-memory |
 | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | Optional; without one, agents use a mock model |
-| `WORKFLOW_API_KEY` | Bearer token protecting `POST /workflows/*` and `/webhooks/*` (open when unset) |
+| `WORKFLOW_API_KEY` | Bearer token protecting `POST /api/reviews` and `/webhooks/*` (open when unset) |
 | `GITHUB_WEBHOOK_SECRET` | HMAC secret for GitHub webhook verification |
 | `GITHUB_TOKEN` | Raises GitHub API rate limits / enables private repo diffs |
 | `RENDER_API_KEY` | Required in production for Render Workflow dispatch |
