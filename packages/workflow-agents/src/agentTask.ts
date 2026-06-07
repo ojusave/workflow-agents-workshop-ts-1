@@ -17,7 +17,6 @@ import type { Agent, AgentInput, AgentResult } from "@workshop/agent";
 interface AgentInvocation {
   input: AgentInput;
   _runId?: string;
-  _parentSpanId?: string;
 }
 
 export function agentTask(agent: Agent) {
@@ -30,7 +29,6 @@ export function agentTask(agent: Agent) {
       return agent.run(invocation.input, {
         tracer: storeTracer(),
         ...(invocation._runId ? { runId: invocation._runId } : {}),
-        ...(invocation._parentSpanId ? { parentSpanId: invocation._parentSpanId } : {}),
       });
     },
   );

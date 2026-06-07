@@ -35,17 +35,14 @@ interface CodeReviewInput {
   labels?: string[];
   /** Break-glass: review the whole diff, including noise files. */
   breakGlass?: boolean;
+  /** Correlation id — links this run's agent spans together in the viewer. */
   _runId?: string;
-  _parentSpanId?: string;
 }
 
 export default task(
   { name: "code-review", timeoutSeconds: 600 },
   async function codeReview(input: CodeReviewInput) {
-    const meta = {
-      ...(input._runId ? { _runId: input._runId } : {}),
-      ...(input._parentSpanId ? { _parentSpanId: input._parentSpanId } : {}),
-    };
+    const meta = input._runId ? { _runId: input._runId } : {};
 
     // Deterministic steps run in-process; agents run as chained Render tasks.
     const allPatches = await prepareDiff({ url: input.url, labels: input.labels ?? [] });

@@ -16,8 +16,8 @@ import { prepareDiff, type Patch } from "@workshop/agent";
 
 interface QuickReviewInput {
   url: string;
+  /** Correlation id — links this run's agent spans together in the viewer. */
   _runId?: string;
-  _parentSpanId?: string;
 }
 
 // A *deterministic step* is just a plain async function. Pure logic doesn't need
@@ -47,10 +47,7 @@ export default task(
     //   import { agentTask } from "../../agentTask.js";
     //   const securityTask = agentTask(securityReviewer);
     //
-    //   const meta = {
-    //     ...(input._runId ? { _runId: input._runId } : {}),
-    //     ...(input._parentSpanId ? { _parentSpanId: input._parentSpanId } : {}),
-    //   };
+    //   const meta = input._runId ? { _runId: input._runId } : {};
     //   const review = await securityTask({ input: { patches }, ...meta });
     //   return { summary, review: review.text };
     //

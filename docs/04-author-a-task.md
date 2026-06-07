@@ -78,10 +78,7 @@ import { agentTask } from "../../agentTask.js";
 const securityTask = agentTask(securityReviewer);
 
 // inside quickReview, after `summary`:
-const meta = {
-  ...(input._runId ? { _runId: input._runId } : {}),
-  ...(input._parentSpanId ? { _parentSpanId: input._parentSpanId } : {}),
-};
+const meta = input._runId ? { _runId: input._runId } : {};
 const review = await securityTask({ input: { patches }, ...meta });
 return { summary, review: review.text };
 ```
@@ -120,4 +117,4 @@ to [`code-review/index.ts`](../packages/workflow-agents/src/workflows/code-revie
 
 You added durable, retried, isolated, traced, parallel execution by writing a
 plain function and a config object. In Pattern 2 that was a queue, a consumer
-group, acks, retries, and a pub/sub bus. **That delta is the workshop.**
+group, acks, retries, and a pub/sub bus. 
