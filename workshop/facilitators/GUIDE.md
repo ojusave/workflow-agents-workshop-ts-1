@@ -202,6 +202,22 @@ whole room.
 
 ## 5. Run sheet (module by module)
 
+### The demo flow at a glance
+
+```
+Setup        render login → render workspace set → npm install → draw the spine
+Pattern 1    Blueprint deploy → live URL → submit PR → show spans/logs → break it
+Pattern 2    Blueprint deploy → submit PRs → tail worker logs → scale worker
+             → open kv.ts: "this is the price"
+LAB 1        implement processEntry → npm run test:worker (red→green)
+── break ──
+Pattern 3    Blueprint web+DB → workflows create → run code-review → show trace
+             → side-by-side fan-out table
+LAB 2        preview your-review → compose agent → force retry → ship live
+Close        re-draw spine: "the agent never changed"
+```
+
+
 Each module below has: **objective**, **talk track**, **do this live**, **the aha**,
 **pitfalls**, and a **check for understanding (CFU)**.
 
@@ -479,22 +495,6 @@ the reason they came.
 - Break → Pattern 3: "Now watch all of that become a config object."
 - Pattern 3 → Lab 2: "Your turn again — but this time, bring out your coding agents."
 - Lab 2 → Close: "Let's zoom out. What changed in the agent? Nothing."
-
-### The demo flow at a glance
-
-```
-Setup        render login → render workspace set → npm install → draw the spine
-Pattern 1    Blueprint deploy → live URL → submit PR → show spans/logs → break it
-Pattern 2    Blueprint deploy → submit PRs → tail worker logs → scale worker
-             → open kv.ts: "this is the price"
-LAB 1        implement processEntry → npm run test:worker (red→green)
-── break ──
-Pattern 3    Blueprint web+DB → workflows create → run code-review → show trace
-             → side-by-side fan-out table
-LAB 2        preview your-review → compose agent → force retry → ship live
-Close        re-draw spine: "the agent never changed"
-```
-
 ---
 
 ## 7. Troubleshooting & FAQ
