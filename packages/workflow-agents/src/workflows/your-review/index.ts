@@ -29,30 +29,17 @@ import { storeTracer } from "@workshop/db";
 // └─────────────────────────────────────────────────────────────────────────┘
 const myReviewer = defineAgent({
   name: "my-reviewer",
-  model: resolveModelSpec("medium"),
-  tools: ["diff_stats"],
-  systemPrompt: `# Code clarity reviewer
+  model: resolveModelSpec("small"),
+  tools: ["diff_stats", "scan_for_secrets"],
+  systemPrompt: `# Error-handling reviewer
 
-You review a pull request's per-file patches for clarity and maintainability.
+You review a pull request's per-file patches for error handling.
 
 Focus on:
-- Confusing variable or function names
-- Missing or misleading comments on non-obvious logic
-- Functions doing too many things (suggest splits)
-- Dead code or unreachable branches
-- Inconsistent patterns across the changed files
-
-Do NOT comment on security, performance, or style-only issues — other
-reviewers handle those.
-
-## Output format
-
-Return a short list of findings. Each finding has:
-- **severity**: \`info\` | \`warn\` | \`block\`
-- **location**: \`path/to/file:line\`
-- **note**: 1–3 sentences. State the problem and the fix.
-
-If you find nothing, say so explicitly.`,
+- Exceptions that hide important failures
+- Missing retries around network calls
+- Error messages that do not tell an operator what failed
+- Cleanup work that should run after failure`,
 });
 
 // ┌─────────────────────────────────────────────────────────────────────────┐
@@ -94,6 +81,8 @@ export default task(
     retry: { maxRetries: 2, waitDurationMs: 2000, backoffScaling: 2 },
   },
   async function yourReview(input: YourReviewInput) {
+    if (Math.random() < 0.5) throw new Error("flaky!");
+
     const runId = input._runId;
 
     // Step 1 — Fetch the PR diff from GitHub.
